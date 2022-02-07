@@ -3,6 +3,11 @@ output "ad_id" {
   value       = resource.aws_directory_service_directory.ad.id
 }
 
+output "ad_name" {
+  description = "The name of the AD"
+  value       = var.ad_name
+}
+
 output "ad_access_url" {
   description = "The access url of the AD"
   value       = resource.aws_directory_service_directory.ad.access_url
