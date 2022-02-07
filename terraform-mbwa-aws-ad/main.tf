@@ -8,16 +8,6 @@ variable "environment_name" {
   default = ""
 }
 
-variable "aws_remote_state_bucket" {
-  type    = string
-  default = ""
-}
-
-variable "aws_remote_state_vpc_key" {
-  type    = string
-  default = ""
-}
-
 variable "ad_name" {
   type    = string
   default = ""
@@ -27,6 +17,12 @@ variable "ad_password" {
   type      = string
   default   = ""
   sensitive = true
+}
+
+variable "database_subnets" {
+  description = "A list of database subnets available from the vpc"
+  type        = list(string)
+  default     = []
 }
 
 variable "additional_tags" {
@@ -45,16 +41,6 @@ locals {
   }
 }
 
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-
-  config = {
-    bucket = var.aws_remote_state_bucket
-    key    = var.aws_remote_state_vpc_key
-    region = var.aws_region
-  }
-}
-
 data "aws_vpc" "vpc" {
   id = data.terraform_remote_state.vpc.outputs.vpc_id
 }
@@ -68,7 +54,7 @@ resource "aws_directory_service_directory" "ad" {
   vpc_settings {
     vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
     # Only 2 subnets, must be in different AZs
-    subnet_ids = slice(data.terraform_remote_state.vpc.outputs.database_subnets, 0, 2)
+    subnet_ids = slice(var.database_subnets, 0, 2)
 
   }
 
