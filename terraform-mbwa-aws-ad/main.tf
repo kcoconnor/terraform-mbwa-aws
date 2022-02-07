@@ -19,6 +19,11 @@ variable "ad_password" {
   sensitive = true
 }
 
+variable "vpc_id" {
+  type    = string
+  default = ""
+}
+
 variable "database_subnets" {
   description = "A list of database subnets available from the vpc"
   type        = list(string)
@@ -41,10 +46,6 @@ locals {
   }
 }
 
-data "aws_vpc" "vpc" {
-  id = data.terraform_remote_state.vpc.outputs.vpc_id
-}
-
 resource "aws_directory_service_directory" "ad" {
   name     = var.ad_name
   password = var.ad_password
@@ -52,7 +53,7 @@ resource "aws_directory_service_directory" "ad" {
   type     = "MicrosoftAD"
 
   vpc_settings {
-    vpc_id = data.terraform_remote_state.vpc.outputs.vpc_id
+    vpc_id = var.vpc_id
     # Only 2 subnets, must be in different AZs
     subnet_ids = slice(var.database_subnets, 0, 2)
 
