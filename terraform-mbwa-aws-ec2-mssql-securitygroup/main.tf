@@ -3,7 +3,7 @@ variable "aws_region" {
   default = ""
 }
 
-variable "my_ip" {
+variable "my_ip_cidr" {
   type    = string
   default = ""
 }
@@ -50,42 +50,42 @@ module "security_group_mssql" {
       to_port     = 80
       protocol    = "tcp"
       description = "HTTP port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip_cidr}"
     },
     {
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
       description = "HTTPS port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip_cidr}"
     },
     {
       from_port   = 1433
       to_port     = 1433
       protocol    = "tcp"
       description = "RDS MSSQL port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip_cidr}"
     },
     {
       from_port   = 3389
       to_port     = 3389
       protocol    = "tcp"
       description = "RDP port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip_cidr}"
     },
     {
       from_port   = 8443
       to_port     = 8443
       protocol    = "tcp"
       description = "RDS MSSQL port for SSRS"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip_cidr}"
     },
     {
       from_port   = 2383
       to_port     = 2383
       protocol    = "tcp"
       description = "RDS MSSQL port for SSAS"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip_cidr}"
     },
   ]
 
