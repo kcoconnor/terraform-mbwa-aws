@@ -19,17 +19,6 @@ variable "ad_password" {
   sensitive = true
 }
 
-variable "vpc_id" {
-  type    = string
-  default = ""
-}
-
-variable "database_subnets" {
-  description = "A list of database subnets available from the vpc"
-  type        = list(string)
-  default     = []
-}
-
 variable "additional_tags" {
   default     = {}
   description = "Additional resource tags"
@@ -46,6 +35,21 @@ locals {
   }
 }
 
+data "aws_vpc" "vpc" {
+  tags = {
+    Name = var.environment_name
+  }
+}
+
+
+data "aws_subnet_ids" "database" {
+  vpc_id = data.aws_vpc.vpc.id
+
+  tags = {
+    subnet_tier = "database"
+  }
+}
+
 resource "aws_directory_service_directory" "ad" {
   name     = var.ad_name
   password = var.ad_password
@@ -53,9 +57,9 @@ resource "aws_directory_service_directory" "ad" {
   type     = "MicrosoftAD"
 
   vpc_settings {
-    vpc_id = var.vpc_id
+    vpc_id = data.aws_vpc.vpc.id
     # Only 2 subnets, must be in different AZs
-    subnet_ids = slice(var.database_subnets, 0, 2)
+    subnet_ids = slice(tolist(data.aws_subnet_ids.database.ids), 0, 2)
   }
 
   tags = merge(local.tags, var.additional_tags, )

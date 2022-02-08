@@ -33,11 +33,6 @@ variable "mssql_instance_type" {
   default = "t3.xlarge"
 }
 
-variable "database_subnets" {
-  type        = list(string)
-  description = "A list of database subnets"
-}
-
 variable "ad_id" {
   type        = string
   description = "The ID of the AD"
@@ -120,7 +115,7 @@ resource "aws_instance" "mssql" {
   key_name                    = data.aws_key_pair.mssql.key_name
   iam_instance_profile        = data.aws_iam_instance_profile.ec2-resources-iam-profile.name
   instance_type               = var.mssql_instance_type
-  subnet_id                   = slice(var.database_subnets, 0, 1)[0]
+  subnet_id                   = slice(tolist(data.aws_subnet_ids.database.ids), 0, 1)[0]
   associate_public_ip_address = true
   vpc_security_group_ids      = [var.aws_security_group_mssql_id]
   user_data                   = data.template_file.init.rendered

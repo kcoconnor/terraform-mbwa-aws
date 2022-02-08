@@ -3,7 +3,7 @@ variable "aws_region" {
   default = ""
 }
 
-variable "aws_remote_state_bucket" {
+variable "my_ip" {
   type    = string
   default = ""
 }
@@ -29,16 +29,6 @@ locals {
   }
 }
 
-data "terraform_remote_state" "my_ip" {
-  backend = "s3"
-
-  config = {
-    bucket = var.aws_remote_state_bucket
-    key    = "01-my-ip/terraform.tfstate"
-    region = var.aws_region
-  }
-}
-
 data "aws_vpc" "vpc" {
   filter {
     name   = "tag:Name"
@@ -60,42 +50,42 @@ module "security_group_mssql" {
       to_port     = 80
       protocol    = "tcp"
       description = "HTTP port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${data.terraform_remote_state.my_ip.outputs.myip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
     },
     {
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
       description = "HTTPS port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${data.terraform_remote_state.my_ip.outputs.myip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
     },
     {
       from_port   = 1433
       to_port     = 1433
       protocol    = "tcp"
       description = "RDS MSSQL port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${data.terraform_remote_state.my_ip.outputs.myip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
     },
     {
       from_port   = 3389
       to_port     = 3389
       protocol    = "tcp"
       description = "RDP port from VPC/MyPC"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${data.terraform_remote_state.my_ip.outputs.myip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
     },
     {
       from_port   = 8443
       to_port     = 8443
       protocol    = "tcp"
       description = "RDS MSSQL port for SSRS"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${data.terraform_remote_state.my_ip.outputs.myip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
     },
     {
       from_port   = 2383
       to_port     = 2383
       protocol    = "tcp"
       description = "RDS MSSQL port for SSAS"
-      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${data.terraform_remote_state.my_ip.outputs.myip}"
+      cidr_blocks = "${data.aws_vpc.vpc.cidr_block_associations[0].cidr_block},${var.my_ip}"
     },
   ]
 
