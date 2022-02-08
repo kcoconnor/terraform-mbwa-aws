@@ -56,7 +56,6 @@ resource "aws_directory_service_directory" "ad" {
     vpc_id = var.vpc_id
     # Only 2 subnets, must be in different AZs
     subnet_ids = slice(var.database_subnets, 0, 2)
-
   }
 
   tags = merge(local.tags, var.additional_tags, )

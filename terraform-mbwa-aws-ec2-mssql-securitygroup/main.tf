@@ -8,11 +8,6 @@ variable "aws_remote_state_bucket" {
   default = ""
 }
 
-variable "aws_remote_state_my_ip_key" {
-  type    = string
-  default = ""
-}
-
 variable "environment_name" {
   type    = string
   default = ""
@@ -39,7 +34,7 @@ data "terraform_remote_state" "my_ip" {
 
   config = {
     bucket = var.aws_remote_state_bucket
-    key    = var.aws_remote_state_my_ip_key
+    key    = "01-my-ip/terraform.tfstate"
     region = var.aws_region
   }
 }

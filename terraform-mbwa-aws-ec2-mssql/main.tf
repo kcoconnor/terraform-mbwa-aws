@@ -14,21 +14,6 @@ variable "windows_admin_password" {
   sensitive   = true
 }
 
-variable "aws_remote_state_bucket" {
-  type    = string
-  default = ""
-}
-
-variable "aws_remote_state_vpc_key" {
-  type    = string
-  default = ""
-}
-
-variable "aws_remote_state_ad_key" {
-  type    = string
-  default = ""
-}
-
 variable "mssql_ami_owner" {
   type    = string
   default = "amazon"
@@ -48,6 +33,34 @@ variable "mssql_instance_type" {
   default = "t3.xlarge"
 }
 
+variable "database_subnets" {
+  type        = list(string)
+  description = "A list of database subnets"
+}
+
+variable "ad_id" {
+  type        = string
+  description = "The ID of the AD"
+  value       = resource.aws_directory_service_directory.ad.id
+}
+
+variable "ad_name" {
+  type        = string
+  description = "The name of the AD"
+  value       = var.ad_name
+}
+
+variable "ad_dns_ip_addresses" {
+  type        = list(string)
+  description = "The dns ip addresses of the AD"
+  value       = resource.aws_directory_service_directory.ad.dns_ip_addresses
+}
+
+variable "aws_security_group_mssql_id" {
+  value = data.aws_security_group.mssql.id
+}
+
+
 locals {
 
   env_title = title("${var.environment_name}")
@@ -58,26 +71,6 @@ locals {
     ops_module_repo      = "kcoconnor/terraform-mbwa-aws",
     ops_module_repo_path = "terraform-mbwa-aws-ec2-mssql",
     ops_owners           = "kcoconnor",
-  }
-}
-
-data "terraform_remote_state" "ad" {
-  backend = "s3"
-
-  config = {
-    bucket = var.aws_remote_state_bucket
-    key    = var.aws_remote_state_ad_key
-    region = var.aws_region
-  }
-}
-
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-
-  config = {
-    bucket = var.aws_remote_state_bucket
-    key    = var.aws_remote_state_vpc_key
-    region = var.aws_region
   }
 }
 
@@ -122,32 +115,21 @@ data "aws_iam_instance_profile" "ec2-resources-iam-profile" {
   name = "EC2DomainJoin${local.env_title}"
 }
 
-data "aws_security_group" "mssql" {
-
-  vpc_id = data.aws_vpc.vpc.id
-
-  filter {
-    name   = "tag:Name"
-    values = ["dev-mssql"]
-  }
-
-}
-
 resource "aws_instance" "mssql" {
   ami                         = data.aws_ami.mssql.image_id
   key_name                    = data.aws_key_pair.mssql.key_name
   iam_instance_profile        = data.aws_iam_instance_profile.ec2-resources-iam-profile.name
   instance_type               = var.mssql_instance_type
-  subnet_id                   = slice(data.terraform_remote_state.vpc.outputs.database_subnets, 0, 1)[0]
+  subnet_id                   = slice(var.database_subnets, 0, 1)[0]
   associate_public_ip_address = true
-  vpc_security_group_ids      = [data.aws_security_group.mssql.id]
+  vpc_security_group_ids      = [var.aws_security_group_mssql_id]
   user_data                   = data.template_file.init.rendered
   get_password_data           = true
   tags                        = local.tags
 }
 
 resource "aws_ssm_document" "ssm_document" {
-  name          = "ssm_document_${data.terraform_remote_state.ad.outputs.ad_name}"
+  name          = "ssm_document_${var.ad_name}"
   document_type = "Command"
   content       = <<DOC
 {
@@ -156,9 +138,9 @@ resource "aws_ssm_document" "ssm_document" {
     "runtimeConfig": {
         "aws:domainJoin": {
             "properties": {
-                "directoryId": "${data.terraform_remote_state.ad.outputs.ad_id}",
-                "directoryName": "${data.terraform_remote_state.ad.outputs.ad_name}",
-                "dnsIpAddresses": ${jsonencode(data.terraform_remote_state.ad.outputs.ad_dns_ip_addresses)}
+                "directoryId": "${var.ad_id}",
+                "directoryName": "${var.ad_name}",
+                "dnsIpAddresses": ${jsonencode(var.ad_dns_ip_addresses)}
             }
         }
     }
