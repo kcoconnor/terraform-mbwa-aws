@@ -36,23 +36,21 @@ variable "mssql_instance_type" {
 variable "ad_id" {
   type        = string
   description = "The ID of the AD"
-  value       = resource.aws_directory_service_directory.ad.id
 }
 
 variable "ad_name" {
   type        = string
   description = "The name of the AD"
-  value       = var.ad_name
 }
 
 variable "ad_dns_ip_addresses" {
   type        = list(string)
   description = "The dns ip addresses of the AD"
-  value       = resource.aws_directory_service_directory.ad.dns_ip_addresses
 }
 
 variable "aws_security_group_mssql_id" {
-  value = data.aws_security_group.mssql.id
+  type        = string
+  description = "The mssql security id"
 }
 
 
