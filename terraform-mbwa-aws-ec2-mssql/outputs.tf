@@ -9,3 +9,7 @@ output "key_pair_name" {
 output "key_pair_id" {
   value = data.aws_key_pair.mssql.id
 }
+
+output "server_id1" {
+  value = aws_instance.mssql.id
+}
