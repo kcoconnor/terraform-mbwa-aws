@@ -1,0 +1,33 @@
+
+Set-ADFineGrainedPasswordPolicy -Identity:"CN=CustomerPSO-01,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -MaxPasswordAge:"60.00:00:00" -MinPasswordLength:"20" -PasswordHistoryCount:"8"
+
+Rename-ADObject -Identity:"CN=CustomerPSO-01,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -NewName:"DelegatedAdminPSO-10"
+
+Set-ADFineGrainedPasswordPolicy -Identity:"CN=CustomerPSO-04,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -LockoutDuration:"00:30:00" -LockoutObservationWindow:"00:10:00" -LockoutThreshold:"5" -MaxPasswordAge:"365.00:00:00" -MinPasswordLength:"20" -PasswordHistoryCount:"8"
+
+Rename-ADObject -Identity:"CN=CustomerPSO-04,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -NewName:"ServiceAccountPSO-40"
+
+Set-ADFineGrainedPasswordPolicy -Identity:"CN=CustomerPSO-05,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -LockoutDuration:"00:30:00" -LockoutObservationWindow:"00:10:00" -LockoutThreshold:"5" -MaxPasswordAge:"90.00:00:00" -MinPasswordLength:8" -PasswordHistoryCount:"8"
+
+Rename-ADObject -Identity:"CN=CustomerPSO-05,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -NewName:"UserAccountPSO-50"
+
+Rename-ADObject -Identity:"CN=CustomerPSO-04,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -NewName:"ServiceAccountPSO-40" -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co"
+
+
+New-ADUser -Name:"PortalUser" -Path:"OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co" -SamAccountName:"PortalUser" -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co" -Type:"user"
+# Set-ADAccountPassword -Identity:"CN=PortalUser,OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co" -NewPassword:"System.Security.SecureString" -Reset:$true -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co"
+Enable-ADAccount -Identity:"CN=PortalUser,OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co" -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co"
+Set-ADAccountControl -AccountNotDelegated:$false -AllowReversiblePasswordEncryption:$false -CannotChangePassword:$false -DoesNotRequirePreAuth:$false -Identity:"CN=PortalUser,OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co" -PasswordNeverExpires:$false -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co" -UseDESKeyOnly:$false
+Set-ADUser -ChangePasswordAtLogon:$false -Identity:"CN=PortalUser,OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co" -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co" -SmartcardLogonRequired:$false
+Add-ADFineGrainedPasswordPolicySubject -Identity:"CN=ServiceAccountPSO-40,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co" -Subjects:"CN=PortalUser,OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co"
+
+
+Invoke-WebRequest -Uri N'https://github.com/Microsoft/sql-server-samples/releases/download/adventureworks/AdventureWorks2019.bak' -OutFile N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Backup\AdventureWorks2019.bak'
+
+
+
+USE [master]
+RESTORE DATABASE [AdventureWorks2019] FROM  DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Backup\AdventureWorks2019.bak' WITH  FILE = 1,  MOVE N'AdventureWorks2017' TO N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\AdventureWorks2019.mdf',  MOVE N'AdventureWorks2017_log' TO N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\AdventureWorks2019_log.ldf',  NOUNLOAD,  STATS = 5
+GO
+
+
