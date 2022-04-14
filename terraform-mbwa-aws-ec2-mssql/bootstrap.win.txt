@@ -31,13 +31,14 @@ netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" n
 Start-Service -Name WinRM
 
 # Allow HTTP on port 80
-netsh advfirewall firewall add rule name="Allow HTTP" protocol=TCP dir=in localport=80 action=allow
+# netsh advfirewall firewall add rule name="Allow HTTP" protocol=TCP dir=in localport=80 action=allow
 
 # Allow HTTPS on port 443
-netsh advfirewall firewall add rule name="Allow HTTPS" protocol=TCP dir=in localport=443 action=allow
+# netsh advfirewall firewall add rule name="Allow HTTPS" protocol=TCP dir=in localport=443 action=allow
 
 # Install Remote Adminstration Tools to access the Active Directory
 Install-WindowsFeature RSAT
+
 
 
 </powershell>

@@ -21,8 +21,8 @@ Set-ADAccountControl -AccountNotDelegated:$false -AllowReversiblePasswordEncrypt
 Set-ADUser -ChangePasswordAtLogon:$false -Identity:"CN=PortalUser,OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co" -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co" -SmartcardLogonRequired:$false
 Add-ADFineGrainedPasswordPolicySubject -Identity:"CN=ServiceAccountPSO-40,CN=Password Settings Container,CN=System,DC=ad,DC=dev,DC=mbwa,DC=co" -Server:"WIN-5M5PK03GIN0.ad.dev.mbwa.co" -Subjects:"CN=PortalUser,OU=Users,OU=ad,DC=ad,DC=dev,DC=mbwa,DC=co"
 
-
-Invoke-WebRequest -Uri N'https://github.com/Microsoft/sql-server-samples/releases/download/adventureworks/AdventureWorks2019.bak' -OutFile N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Backup\AdventureWorks2019.bak'
+$ProgressPreference = 'SilentlyContinue'
+Invoke-WebRequest -Uri 'https://github.com/Microsoft/sql-server-samples/releases/download/adventureworks/AdventureWorks2019.bak' -OutFile 'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Backup\AdventureWorks2019.bak'
 
 
 

@@ -20,8 +20,9 @@ variable "mssql_ami_owner" {
 }
 
 variable "mssql_ami_name" {
-  type    = string
-  default = "Windows_Server-2019-English-Full-SQL_2019_Standard-*"
+  type = string
+  #default = "Windows_Server-2019-English-Full-SQL_2019_Standard-*"
+  default = "Windows_Server-2019-English-*Base-*"
 }
 
 variable "mssql_key_pair_name" {
